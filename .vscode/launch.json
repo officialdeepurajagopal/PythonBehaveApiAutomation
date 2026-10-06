@@ -1,0 +1,25 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python Debugger: Current File",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Debug Behave: ManageBooks",
+            "type": "debugpy",
+            "request": "launch",
+            "python": "${workspaceFolder}/.venv/bin/python",
+            "module": "behave",
+            "args": [
+                "--no-capture",
+                "tests/feature/ManageBooks.feature"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": true
+        }
+    ]
+}
