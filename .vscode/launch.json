@@ -2,24 +2,22 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python Debugger: Current File",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "${file}",
-            "console": "integratedTerminal"
-        },
-        {
             "name": "Debug Behave: ManageBooks",
             "type": "debugpy",
             "request": "launch",
             "python": "${workspaceFolder}/.venv/bin/python",
             "module": "behave",
             "args": [
+                "--format=plain",
                 "--no-capture",
                 "tests/feature/ManageBooks.feature"
             ],
+            "cwd": "${workspaceFolder}",
             "console": "integratedTerminal",
-            "justMyCode": true
+            "justMyCode": true,
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/tests:${workspaceFolder}/tests/steps"
+            }
         }
     ]
 }
