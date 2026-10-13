@@ -1,10 +1,16 @@
+from ctypes import sizeof
+
 import requests
 import Contants as Constants
 from behave import given, when, then
 from models.GetBookDetails import GetBookDetails
 from models.AddBookRequest import AddBookRequest
 from models.AddBookResponse import AddBookResponse
+import random
+import string
+import logging
 
+logger = logging.getLogger(__name__)
 
 class ManageBooks:
 
@@ -13,6 +19,13 @@ class ManageBooks:
         self.bookId = none
         self.response = none
         self.newBookId = none
+
+
+def create_random_data(incomingData):
+    """Create a distinct value by appending a short random suffix."""
+    suffix = ''.join(random.choices(string.ascii_letters + string.digits, k=4))
+    result = incomingData + suffix
+    return result
 
 
 @given('I have the url setup for "{operation}"')
@@ -42,9 +55,9 @@ def validate_book_name(ManageBooks, bookName):
 def create_request_to_add_book(ManageBooks, name, isbn, aisle, author):
     """Creating the request body to add a book"""
     ManageBooks.AddBookRequest = AddBookRequest(
-        name=name,
+        name=create_random_data(name),
         isbn=isbn,
-        aisle=aisle,
+        aisle=random.randint(1, 1000),
         author=author,
     )
 
@@ -54,11 +67,16 @@ def send_add_book_request(ManageBooks):
     headers = {'Content-Type': 'application/json'}
     ManageBooks.response = requests.post(ManageBooks.baseUrl, json=ManageBooks.AddBookRequest.__dict__, headers=headers)
 
+    logger.info(f"Request body: {ManageBooks.AddBookRequest.__dict__}")
+    logger.info(f"Response body: {ManageBooks.response.text}")
+
+    assert ManageBooks.response.status_code == 200, (
+        f"Expected status code 200, but got {ManageBooks.response.status_code}. "
+        f"Response body : {ManageBooks.response.text}"
+    )
     responseOfAddBook = AddBookResponse(**ManageBooks.response.json())
     ManageBooks.newBookId = responseOfAddBook.ID
 
-    assert ManageBooks.response.status_code == 200, f"Expected status code 200, but got {ManageBooks.response.status_code}"
-    
 
 @then('I want to validate the response code is {code}')
 def validate_response_code(ManageBooks, code):
@@ -69,7 +87,30 @@ def validate_response_code(ManageBooks, code):
 def get_details_of_created_book(ManageBooks):
     """Sending GET request to get the details of the created book"""
     bookId = ManageBooks.newBookId
-    reqUrl = f"{ManageBooks.baseUrl}?ID={bookId}"
+    reqUrl = f"{Constants.BASE_URL}{Constants.Get_Book}?ID={bookId}"
     ManageBooks.response = requests.get(reqUrl)
 
     assert ManageBooks.response.status_code == 200, f"Expected status code 200, but got {ManageBooks.response.status_code}"
+
+# @given('I do this list programme to learn')
+# def learn_programmes(ManageBooks):
+#     list_of_names = ["Alice", "Bob", "Charlie", "David", "Eve"]
+
+#     for name in list_of_names:
+#      if name.startswith("D"):
+#         logger.info(f"{name} starts with D")
+
+
+@given('I do this list programme to learn')
+def learn_programmes(ManageBooks):
+    list_of_names = ["Alice", "Bob", "Charlie", "David", "Eve"]
+    new_list_of_names=[]
+
+    for i in range(len(list_of_names)):
+        name = list_of_names[i]
+        if name.startswith("D") or name.startswith("E"):
+            logger.info(f"{name} starts with D")
+            new_list_of_names.append(name)
+        
+    logger.info(f" length of new list: {len(new_list_of_names)}")
+        
